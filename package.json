@@ -1,0 +1,28 @@
+{
+  "name": "mayes-smei",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Mayes Smei — Plateforme de cours de Physique, Chimie et SVT pour la 2ème année secondaire (Tunisie), avec assistant IA et schémas 3D interactifs.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node server/index.js",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "lucide-react": "^0.383.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "gh-pages": "^6.1.1",
+    "vite": "^5.4.1"
+  }
+}
