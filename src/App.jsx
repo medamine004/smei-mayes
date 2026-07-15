@@ -1146,12 +1146,27 @@ const STYLES = `
   .chapter__hero { grid-template-columns: 1fr; }
   .home__title-line { font-size: 42px; }
   .chat-panel {
-    width: 100vw;
-    right: -100vw;
+    inset: 0;
+    width: auto;
+    right: auto;
+    left: 0;
+    max-width: 100vw;
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
-  .chat-panel--open { right: 0; }
-  .topbar { padding: 14px 16px 14px 60px; }
+  .chat-panel--open { transform: translateX(0); right: auto; }
+  .chat-panel__messages { -webkit-overflow-scrolling: touch; }
+  .chat-input { font-size: 16px; }
+  .topbar {
+    padding: 12px 14px 12px 56px;
+    gap: 8px;
+  }
+  .topbar__crumbs { display: none; }
+  .topbar__home span, .topbar__home { font-size: 12.5px; white-space: nowrap; }
+  .topbar__ai-btn {
+    font-size: 12px; padding: 7px 12px; white-space: nowrap; flex-shrink: 0;
+  }
 }
 `;
