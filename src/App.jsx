@@ -3,7 +3,7 @@ import * as THREE from "three";
 import {
   Zap, FlaskConical, Atom, Send, X, Menu, ChevronRight, ChevronDown, BookOpen,
   MessageCircle, Sparkles, GraduationCap, CircuitBoard, Magnet, Lightbulb,
-  Globe2, TestTube, Layers, ArrowLeft, Loader2, RotateCcw, Languages
+  Globe2, TestTube, Layers, ArrowLeft, Loader2, RotateCcw, Languages, FileCheck2
 } from "lucide-react";
 import { SUBJECTS_DATA } from "./data.js";
 
@@ -452,9 +452,55 @@ function buildQuizForChapter(chapter) {
 
 function RevisionView({ chapter, onAskAi }) {
   const [revealed, setRevealed] = useState({});
-  const quiz = buildQuizForChapter(chapter);
   const toggle = (id) => setRevealed(prev => ({ ...prev, [id]: !prev[id] }));
 
+  const hasRealExercises = Array.isArray(chapter.exercises) && chapter.exercises.length > 0;
+
+  if (hasRealExercises) {
+    return (
+      <div className="revision">
+        <div className="revision__head">
+          <h3>{UI.revisionHead}{chapter.titleFr}</h3>
+          <p>Essaie de résoudre chaque exercice toi-même avant d'ouvrir la correction.</p>
+        </div>
+        <div className="revision__list">
+          {chapter.exercises.map((ex, i) => {
+            const id = `${chapter.id}-ex-${i}`;
+            return (
+              <div className="revision-card" key={id}>
+                <div className="revision-card__num">{String(i + 1).padStart(2, "0")}</div>
+                <div className="revision-card__body">
+                  <div className="revision-card__q">{ex.q}</div>
+                  {revealed[id] && (
+                    <div className="revision-card__hint revision-card__solution">
+                      <strong>Correction :</strong> {ex.solution}
+                      {ex.qAr && (
+                        <div className="revision-card__solution-ar" dir="rtl">
+                          <div className="revision-card__ar-label"><Languages size={12} /> بالعربية</div>
+                          <div className="revision-card__q-ar">{ex.qAr}</div>
+                          <div>{ex.solutionAr}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="revision-card__actions">
+                    <button className="chip-btn" onClick={() => toggle(id)}>
+                      {revealed[id] ? "Masquer la correction" : "Voir la correction"}
+                    </button>
+                    <button className="chip-btn chip-btn--ai" onClick={() => onAskAi(`${chapter.titleFr} — exercice : ${ex.q}`)}>
+                      <MessageCircle size={13} /> {UI.askAboutIt}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  const quiz = buildQuizForChapter(chapter);
   return (
     <div className="revision">
       <div className="revision__head">
@@ -496,6 +542,7 @@ function schemaKindFor(chapterId) {
 
 function LessonCard({ section, index, subject, onAskAi }) {
   const [showMore, setShowMore] = useState(false);
+  const [showAr, setShowAr] = useState(false);
   return (
     <article className="lesson-card">
       <div className="lesson-card__head">
@@ -515,6 +562,16 @@ function LessonCard({ section, index, subject, onAskAi }) {
         </div>
       )}
 
+      {showAr && section.bodyAr && (
+        <div className="lesson-card__ar" dir="rtl">
+          <div className="lesson-card__ar-label">
+            <Languages size={13} /> بالعربية
+          </div>
+          {section.hAr && <h4>{section.hAr}</h4>}
+          <p>{section.bodyAr}</p>
+        </div>
+      )}
+
       <div className="lesson-card__actions">
         <button
           className="lesson-card__ask"
@@ -529,6 +586,14 @@ function LessonCard({ section, index, subject, onAskAi }) {
         >
           <Languages size={14} /> {showMore ? UI.hideExplainMore : UI.explainMore}
         </button>
+        {section.bodyAr && (
+          <button
+            className="lesson-card__toggle-trad"
+            onClick={() => setShowAr(v => !v)}
+          >
+            <Languages size={14} /> {showAr ? "Masquer l'arabe" : "Traduction arabe"}
+          </button>
+        )}
       </div>
     </article>
   );
@@ -636,7 +701,7 @@ function Sidebar({ activeSubject, setActiveSubject, activeChapter, setActiveChap
                               onClick={() => setMode("revision")}
                               style={mode === "revision" ? { color: subj.accent } : {}}
                             >
-                              <RotateCcw size={12} /> Révision
+                              <FileCheck2 size={12} /> Devoir
                             </button>
                           </div>
                         )}
@@ -1074,7 +1139,7 @@ const STYLES = `
 .lesson-card__ar p { font-size: 14px; line-height: 2; color: var(--text-dim); margin: 0; }
 
 .lesson-card__actions { display: flex; gap: 10px; flex-wrap: wrap; }
-.lesson-card__ask, .lesson-card__toggle-ar {
+.lesson-card__ask, .lesson-card__toggle-ar, .lesson-card__toggle-trad {
   display: inline-flex; align-items: center; gap: 6px;
   background: transparent; border: 1px solid; padding: 7px 14px;
   border-radius: 20px; font-size: 12.5px; cursor: pointer;
@@ -1082,6 +1147,9 @@ const STYLES = `
 }
 .lesson-card__toggle-ar {
   border-color: #84E67A55; color: #84E67A; font-family: 'Tajawal', sans-serif;
+}
+.lesson-card__toggle-trad {
+  border-color: #FB923C55; color: #FB923C; font-family: 'Tajawal', sans-serif;
 }
 
 /* ---------- Revision ---------- */
@@ -1093,6 +1161,17 @@ const STYLES = `
 .revision-card__num { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--text-faint); flex-shrink: 0; }
 .revision-card__q { font-size: 14.5px; font-weight: 600; margin-bottom: 8px; }
 .revision-card__hint { font-size: 13.5px; color: var(--text-dim); line-height: 1.8; background: #ffffff06; padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; }
+.revision-card__solution { color: var(--text); }
+.revision-card__solution strong { color: #84E67A; }
+.revision-card__solution-ar {
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-family: 'Tajawal', sans-serif; color: var(--text-dim); line-height: 2;
+}
+.revision-card__q-ar { font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.revision-card .revision-card__ar-label {
+  display: flex; align-items: center; gap: 5px; font-size: 11px; color: #FB923C;
+  margin-bottom: 6px; font-weight: 700;
+}
 .revision-card__actions { display: flex; gap: 8px; }
 .chip-btn {
   font-size: 12px; padding: 6px 12px; border-radius: 20px;
